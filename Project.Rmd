@@ -1,0 +1,130 @@
+---
+title: "Simulation"
+author: "Amy Lee"
+date: "November 8, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Simulation Project
+In this project you will investigate the exponential distribution in R and compare it with the Central Limit Theorem.   The exponential distribution can be simulated in R with rexp(n, lambda) where lambda is the rate parameter.  The mean of exponential distribution is 1/lambda and the standard deviation is also 1/lambda.  Set lambda = 0.2 for all of the simulations.  You will investigate the distribution of averages of 40 exponentials.  Note that you will need to do a thousand simulations.  
+
+
+Illustrate via simulation and associated explanatory text the properties of the distribution of the mean of 40 exponentials. You should
+
+1) Show the sample mean and compare it to the theoretical mean of the distribution.
+2) Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
+3) Show that the distribution is approximately normal.
+
+---
+
+# Review Criteria
+- Did you show where the distribution is centered at and compare it to the theoretical center of the distribution?
+- Did you show how variable it is and compare it to the theoretical variance of the distribution?
+- Did you perform an exploratory data analysis of at least a single plot or table highlighting basic features of the data?
+- Did the student perform some relevant confidence intervals and/or tests?
+- Were the results of the tests and/or intervals interpreted in the context of the problem correctly?
+- Did the student describe the assumptions needed for their conclusions?
+
+---
+
+# Overview
+
+This project was completed to observe the effect of Central Limit Theorem.
+Central Limit Theorem states, the distribution of the sample means approximate a normal distribution as the sample size increases. 
+In this project, we will use the exponential distribution as our sample where lambda=0.2 and each sample size=40.
+
+Before we start the project, packages must be imported first.
+
+#### Necessary packages
+```{r message=FALSE}
+library(ggplot2)
+library(Hmisc)
+```
+
+And now, we need to make the samples (1000 samples of n=40, lambda=0.2 exp distributions)
+
+#### Making Samples
+```{r}
+exp<-c()
+for (i in 1:1000){
+  exp<-rbind(exp,rexp(40,0.2))
+}
+head(exp)
+```
+
+Here is the sample data. Each row is one sample exponential distribution with lambda = 0.2 and n = 40.
+There are 1000 sample datas (1000 rows)
+Now, we can start answering question.
+
+## 1) Show the sample mean and compare it to the theoretical mean of the distribution.
+
+
+```{r}
+mns<-c()
+for (i in 1:1000) {
+  mns[i]<-mean(exp[i,])
+}
+means<-cumsum(mns[1:1000])/(1:1000)
+```
+
+First, I made the mns vector which contains the means of all distribution of the 1000 samples.
+And made the cumulative sum vector called means.
+
+```{r}
+vrs<-c()
+for (i in 1:1000) {
+  vrs[i]<-var(exp[i,])
+}
+p<-ggplot(data.frame(x=1:1000, y=mns), aes(x=x, y=y))+geom_point()+geom_line(size=0.5)
+p<-p+ylim(min(mns-qnorm(0.975)*sqrt(vrs/40))-0.1,max(mns+qnorm(0.975)*sqrt(vrs/40))+0.1)+geom_hline(yintercept=5, size=1, color="red")
+p<-p+labs(title="Comparing True Mean to the Each Sample Mean", x="Sample Number", y="Mean")
+p<-p+geom_pointrange(aes(ymin=mns-qnorm(0.975)*sqrt(vrs/40), ymax=mns+qnorm(0.975)*sqrt(vrs/40)), color=ifelse(mns-qnorm(0.975)*sqrt(vrs/40)>5 | mns+qnorm(0.975)*sqrt(vrs/40)<5, "red","black"), alpha=0.2)
+p
+```
+
+The graph above shows the mean of each 1000 samples and its 95% interval. 
+If the confidence interval did not contain the true mean of 5, it was colored red. 
+The graph above doesn't clearly show the CI, so I will show the first 50 samples below.
+
+```{r}
+p1<-ggplot(data.frame(x=1:50, y=mns[1:50]), aes(x=x, y=y))+geom_point()+geom_line(size=0.5)
+p1<-p1+ylim(min(mns[1:50]-qnorm(0.975)*sqrt(vrs[1:50]/40))-0.1,max(mns[1:50]+qnorm(0.975)*sqrt(vrs[1:50]/40))+0.1)+geom_hline(yintercept=5, size=1, color="red")
+p1<-p1+labs(title="Comparing True Mean to the Each Sample Mean (50 samples)", x="Sample Number", y="Mean")
+p1<-p1+geom_pointrange(aes(ymin=mns[1:50]-qnorm(0.975)*sqrt(vrs[1:50]/40), ymax=mns[1:50]+qnorm(0.975)*sqrt(vrs[1:50]/40)), color=ifelse(mns[1:50]-qnorm(0.975)*sqrt(vrs[1:50]/40)>5 | mns[1:50]+qnorm(0.975)*sqrt(vrs[1:50]/40)<5, "red","black"), alpha=0.2)
+p1
+```
+
+
+
+
+
+
+Then, I calculated the cumulative means to see how the mean changes as the sample size increased.
+
+```{r}
+g_m<-ggplot(data.frame(x=1:1000, y=means), aes(x=x, y=y))+geom_line(size=0.5)+geom_point()
+g_m<-g_m+ylim(min(means)-0.1,max(means)+0.1)+geom_hline(yintercept=5, size=1, color="red")
+g_m<-g_m+labs(title="Change in Sample Mean as Sample Size Increase", x="Sample Size", y="Mean")
+g_m
+```
+
+As it can be observed on the graph, the sample mean converges to the theoretical mean of 5.
+
+## 2) Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
+
+Variance of the sample mean is the variance of the population over the sample size.
+So, the variance of the exponential distribution is 1/lambda^2 which is 25.
+And the sample size is 40. This makes the variance of the sample mean 0.625
+So the variance of the sample should be similar to 0.625.
+
+```{r}
+var(mns)
+```
+
+As shown above, it can be seen that the sample variance is similar to the theoretical variance.
+
+3) Show that the distribution is approximately normal.

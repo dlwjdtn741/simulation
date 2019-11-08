@@ -29,3 +29,11 @@ means[1000]
 
 #sample var=sigma^2/n 
 
+
+
+
+p1<-ggplot(data.frame(x=1:50, y=mns[1:50]), aes(x=x, y=y))+geom_point()+geom_line(size=0.5)
+p1<-p1+ylim(min(mns[1:50]-qnorm(0.975)*sqrt(vrs[1:50]/40))-0.1,max(mns[1:50]+qnorm(0.975)*sqrt(vrs[1:50]/40))+0.1)+geom_hline(yintercept=5, size=1, color="red")
+p1<-p1+labs(title="Change in Sample Mean as Sample Size Increase", x="Sample Size", y="Mean")
+p1<-p1+geom_pointrange(aes(ymin=mns[1:50]-qnorm(0.975)*sqrt(vrs[1:50]/40), ymax=mns[1:50]+qnorm(0.975)*sqrt(vrs[1:50]/40)), color=ifelse(mns[1:50]-qnorm(0.975)*sqrt(vrs[1:50]/40)>5 | mns[1:50]+qnorm(0.975)*sqrt(vrs[1:50]/40)<5, "red","black"), alpha=0.2)
+p1
