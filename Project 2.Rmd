@@ -1,0 +1,75 @@
+---
+title: "Basic inferential data analysis"
+author: "Amy Lee"
+date: "11/9/2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+# Basic Inferential Data Analysis 
+
+Now in the second portion of the project, we're going to analyze the ToothGrowth data in the R datasets package.
+
+1) Load the ToothGrowth data and perform some basic exploratory data analyses
+2) Provide a basic summary of the data.
+3) Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there's other approaches worth considering)
+4) State your conclusions and the assumptions needed for your conclusions.
+
+---
+
+# Overview
+This project was completed if the tooth length could differ by the supplement type. The test concluded that the supplement type does not affect the tooth length.
+
+#### Necessary Packages
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+## 1) Load the ToothGrowth data and perform some basic exploratory data analyses
+
+```{r}
+data<-ToothGrowth
+str(data)
+head(data)
+data$dose<-as.factor(data$dose)
+```
+
+According to R Documentation, data ToothGrowth is based on an experiment on 60 guinea pigs. These guinea pigs received different dosages (0.5,1,2) of vitamine C with two supplementary method (OJ, VC) and see if the response of tooth lengths differ significantly.
+
+According to the outcome of str function, it is better to have dose variable as a factor instead of numeric. Thus, the conversion was made.
+
+## 2) Provide a basic summary of the data.
+```{r}
+ggplot(data, aes(x=dose, y=len, fill=supp))+geom_boxplot()
+g_data<-data%>%group_by(dose, supp)
+summarize(g_data,mean=mean(len))
+summarize(g_data,n())
+```
+
+# 3) Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there's other approaches worth considering)
+
+```{r}
+OJ<-data%>%filter(supp=="OJ")%>%select(len,dose)
+VC<-data%>%filter(supp=="VC")%>%select(len,dose)
+t.test(OJ$len, VC$len, paired=FALSE)
+```
+
+According to the t test, the p value is equal to 0.06, which is greater than 0.05. Which means, the null hypothesis is rejected.  
+
+# 4) State your conclusions and the assumptions needed for your conclusions.
+
+With the p value greater than 0.05, the two sample t test fails to reject the hypothesis of mu1-mu2=0, which means the data is not sufficient to prove that one supplementary type is better than the other. 
+
+To come to this conclusion, some assumption has to be made. These are:
+1) normality
+2) randomness
+3) equal variance
+
